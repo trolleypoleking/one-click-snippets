@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "One-Click Snippets",
+  "description": "Mark text blocks in Google Docs and copy them with a single click.",
+  "version": "0.1.0",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://docs.google.com/document/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": [ "https://docs.google.com/document/*" ],
+      "js": [ "content_script.js" ],
+      "css": [ "styles.css" ]
+    }
+  ]
+}
