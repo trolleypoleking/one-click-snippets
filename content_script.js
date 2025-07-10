@@ -218,3 +218,8 @@ if (document.readyState === 'loading') {
     loadSavedSnippets();
     document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
 }
+
+// Export functions for testing in Node environments
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { serializeRange, deserializeRange };
+}

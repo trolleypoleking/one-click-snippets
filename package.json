@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Chrome extension to copy selected text snippets in Google Docs.",
   "scripts": {
-    "test": "echo \"No test suite\""
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
