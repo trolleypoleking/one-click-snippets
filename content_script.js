@@ -59,6 +59,28 @@ function deserializeRange(info) {
     return range;
 }
 
+// Inject a copy pill for a snippet span
+function injectCopyPill(span) {
+    if (!span || span.querySelector('.copy-pill')) return;
+
+    const pill = document.createElement('button');
+    pill.className = 'copy-pill';
+    pill.textContent = '⎘';
+
+    const rect = span.getBoundingClientRect();
+    const fullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight &&
+                         rect.left >= 0 && rect.right <= window.innerWidth;
+
+    if (fullyVisible) {
+        span.appendChild(pill);
+    } else {
+        pill.style.position = 'fixed';
+        pill.style.top = '10px';
+        pill.style.right = '10px';
+        document.body.appendChild(pill);
+    }
+}
+
 // Wrap a Range in a span + inject its badge
 function wrapRangeWithSnippet(range, meta) {
     if (!range) return;
@@ -80,6 +102,8 @@ function wrapRangeWithSnippet(range, meta) {
     badge.className = 'snippet-badge';
     badge.textContent = meta.alias;
     span.insertBefore(badge, span.firstChild);
+
+    injectCopyPill(span);
 }
 
 // Save a snippet’s metadata to chrome.storage.sync
@@ -99,6 +123,7 @@ function loadSavedSnippets() {
             const range = deserializeRange(meta.rangeInfo);
             wrapRangeWithSnippet(range, meta);
         });
+        document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
     });
 }
 
@@ -185,7 +210,11 @@ document.addEventListener('click', (e) => {
 
 // 3) On-load rehydrate snippets
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadSavedSnippets);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSavedSnippets();
+        document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
+    });
 } else {
     loadSavedSnippets();
+    document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
 }
