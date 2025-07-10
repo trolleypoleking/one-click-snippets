@@ -1,0 +1,2 @@
+# Requirements for running tests
+jest==29.7.0
