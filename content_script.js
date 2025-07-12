@@ -379,11 +379,64 @@ if (typeof document !== 'undefined') {
 
 // —— LEADER KEY OVERLAY ——
 let overlayEl = null;
+let resultsEl = null;
+let results = [];
+let selectedIdx = 0;
+
+function fuzzyScore(text, query) {
+    if (!query) return 0;
+    text = (text || '').toLowerCase();
+    query = query.toLowerCase();
+    let score = 0;
+    let ti = 0;
+    for (const qc of query) {
+        const idx = text.indexOf(qc, ti);
+        if (idx === -1) return 0;
+        score += (text.length - idx);
+        ti = idx + 1;
+    }
+    return score;
+}
+
+function searchSnippets(query) {
+    const spans = Array.from(document.querySelectorAll('.oneclick-snippet'));
+    return spans
+        .map(span => {
+            const alias = span.dataset.alias || '';
+            const id = span.dataset.snippetId || '';
+            const score = Math.max(fuzzyScore(alias, query), fuzzyScore(id, query));
+            return { span, alias, id, score };
+        })
+        .filter(r => r.score > 0 || !query)
+        .sort((a, b) => b.score - a.score);
+}
+
+function renderResults() {
+    if (!resultsEl) return;
+    resultsEl.innerHTML = '';
+    results.forEach((r, idx) => {
+        const li = document.createElement('li');
+        li.textContent = r.alias || r.id;
+        if (idx === selectedIdx) li.classList.add('highlight');
+        li.addEventListener('mouseenter', () => {
+            selectedIdx = idx;
+            renderResults();
+        });
+        li.addEventListener('click', () => {
+            copySnippetText(r.span);
+            closeLeaderOverlay();
+        });
+        resultsEl.appendChild(li);
+    });
+}
 
 function closeLeaderOverlay() {
     if (overlayEl) {
         overlayEl.remove();
         overlayEl = null;
+        resultsEl = null;
+        results = [];
+        selectedIdx = 0;
     }
 }
 
@@ -397,6 +450,9 @@ function openLeaderOverlay() {
     const input = document.createElement('input');
     input.type = 'text';
     modal.appendChild(input);
+    resultsEl = document.createElement('ul');
+    resultsEl.className = 'ocs-results';
+    modal.appendChild(resultsEl);
     overlayEl.appendChild(modal);
 
     overlayEl.addEventListener('click', (e) => {
@@ -407,10 +463,37 @@ function openLeaderOverlay() {
         if (e.key === 'Escape') {
             e.preventDefault();
             closeLeaderOverlay();
+        } else if (e.key === 'ArrowDown') {
+            if (results.length > 0) {
+                selectedIdx = (selectedIdx + 1) % results.length;
+                renderResults();
+                e.preventDefault();
+            }
+        } else if (e.key === 'ArrowUp') {
+            if (results.length > 0) {
+                selectedIdx = (selectedIdx - 1 + results.length) % results.length;
+                renderResults();
+                e.preventDefault();
+            }
+        } else if (e.key === 'Enter') {
+            const r = results[selectedIdx];
+            if (r) {
+                e.preventDefault();
+                copySnippetText(r.span);
+                closeLeaderOverlay();
+            }
         }
     });
 
+    input.addEventListener('input', () => {
+        results = searchSnippets(input.value.trim());
+        selectedIdx = 0;
+        renderResults();
+    });
+
     document.body.appendChild(overlayEl);
+    results = searchSnippets('');
+    renderResults();
     input.focus();
 }
 
