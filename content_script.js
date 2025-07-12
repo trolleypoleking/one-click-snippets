@@ -422,6 +422,7 @@ let overlayEl = null;
 let resultsEl = null;
 let results = [];
 let selectedIdx = 0;
+let handleOverlayKey = null;
 
 function fuzzyScore(text, query) {
     if (!query) return 0;
@@ -457,7 +458,17 @@ function renderResults() {
     results.forEach((r, idx) => {
         const li = document.createElement('li');
         li.textContent = r.alias || r.id;
-        if (idx === selectedIdx) li.classList.add('highlight');
+        li.setAttribute('role', 'option');
+        li.id = `ocs-result-${idx}`;
+        if (idx === selectedIdx) {
+            li.classList.add('highlight');
+            li.setAttribute('aria-selected', 'true');
+            if (resultsEl && resultsEl.previousSibling && resultsEl.previousSibling.getAttribute) {
+                resultsEl.previousSibling.setAttribute('aria-activedescendant', li.id);
+            }
+        } else {
+            li.removeAttribute('aria-selected');
+        }
         li.addEventListener('mouseenter', () => {
             selectedIdx = idx;
             renderResults();
@@ -474,6 +485,10 @@ function closeLeaderOverlay() {
     if (overlayEl) {
         overlayEl.remove();
         overlayEl = null;
+        if (handleOverlayKey) {
+            document.removeEventListener('keydown', handleOverlayKey);
+            handleOverlayKey = null;
+        }
         resultsEl = null;
         results = [];
         selectedIdx = 0;
@@ -487,17 +502,32 @@ function openLeaderOverlay() {
 
     const modal = document.createElement('div');
     modal.className = 'ocs-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     const input = document.createElement('input');
     input.type = 'text';
+    input.setAttribute('aria-controls', 'ocs-results');
+    input.setAttribute('aria-activedescendant', '');
+    input.setAttribute('aria-haspopup', 'listbox');
     modal.appendChild(input);
     resultsEl = document.createElement('ul');
     resultsEl.className = 'ocs-results';
+    resultsEl.id = 'ocs-results';
+    resultsEl.setAttribute('role', 'listbox');
     modal.appendChild(resultsEl);
     overlayEl.appendChild(modal);
 
     overlayEl.addEventListener('click', (e) => {
         if (e.target === overlayEl) closeLeaderOverlay();
     });
+
+    handleOverlayKey = (e) => {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeLeaderOverlay();
+        }
+    };
+    document.addEventListener('keydown', handleOverlayKey);
 
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
