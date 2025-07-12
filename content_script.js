@@ -217,6 +217,11 @@ function openLeaderOverlay() {
     modal.className = 'ocs-modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', closeLeaderOverlay);
+    modal.appendChild(closeBtn);
     const input = document.createElement('input');
     input.type = 'text';
     input.setAttribute('aria-controls', 'ocs-results');
