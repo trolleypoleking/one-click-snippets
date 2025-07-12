@@ -6,7 +6,12 @@ console.log('One-Click Snippets content script loaded.');
 // CONFIG
 const SNIPPET_BTN_ID = 'ocs-snippet-button';
 const DOC_KEY = (typeof location !== 'undefined' ? location.pathname : ''); // e.g. "/document/d/…"
-const DEFAULT_APPEARANCE = { color: '#4A90E2', border: '2px dashed' };
+const DEFAULT_APPEARANCE = {
+    borderColor: '#4A90E2',
+    borderStyle: '2px dashed',
+    bgTint: 0.08,
+    animDuration: 0.4,
+};
 let appearance = { ...DEFAULT_APPEARANCE };
 let hotkeyMap = {};
 loadAppearance(() => {
@@ -17,7 +22,8 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync') {
             if (changes.appearance) {
-                appearance = changes.appearance.newValue || DEFAULT_APPEARANCE;
+                appearance = Object.assign({}, DEFAULT_APPEARANCE, changes.appearance.newValue);
+                injectAppearanceStyle();
                 document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
             }
             if (changes[DOC_KEY]) {
@@ -43,7 +49,8 @@ function loadAppearance(cb) {
         return;
     }
     chrome.storage.sync.get({ appearance: DEFAULT_APPEARANCE }, data => {
-        appearance = data.appearance || DEFAULT_APPEARANCE;
+        appearance = Object.assign({}, DEFAULT_APPEARANCE, data.appearance);
+        injectAppearanceStyle();
         cb && cb();
     });
 }
@@ -65,10 +72,29 @@ function hexToRgba(hex, alpha) {
     return `rgba(0,0,0,${alpha})`;
 }
 
+function injectAppearanceStyle() {
+    if (typeof document === 'undefined') return;
+    const id = 'ocs-appearance-style';
+    let style = document.getElementById(id);
+    if (!style) {
+        style = document.createElement('style');
+        style.id = id;
+        document.documentElement.appendChild(style);
+    }
+    style.textContent = `:root {\n` +
+        `  --ocs-border-style: ${appearance.borderStyle};\n` +
+        `  --ocs-border-color: ${appearance.borderColor};\n` +
+        `  --ocs-background-color: ${hexToRgba(appearance.borderColor, appearance.bgTint)};\n` +
+        `  --ocs-anim-color-start: ${hexToRgba(appearance.borderColor, 0.2)};\n` +
+        `  --ocs-anim-color-end: ${hexToRgba(appearance.borderColor, 0.5)};\n` +
+        `  --ocs-anim-duration: ${appearance.animDuration}s;\n` +
+        `}`;
+}
+
 function applyAppearanceToSpan(span) {
     if (!span) return;
-    span.style.border = `${appearance.border} ${appearance.color}`;
-    span.style.background = hexToRgba(appearance.color, 0.08);
+    span.style.border = `var(--ocs-border-style) var(--ocs-border-color)`;
+    span.style.background = `var(--ocs-background-color)`;
 }
 
 // —— HELPERS ——
@@ -325,7 +351,7 @@ function showSnippetButton(rect) {
         position: 'absolute',
         zIndex: '9999',
         padding: '4px 8px',
-        background: '#4A90E2',
+        background: 'var(--ocs-border-color)',
         color: '#fff',
         border: 'none',
         borderRadius: '4px',
