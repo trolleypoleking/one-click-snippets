@@ -12,6 +12,15 @@ loadAppearance(() => {
     document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
 });
 
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'sync' && changes.appearance) {
+            appearance = changes.appearance.newValue || DEFAULT_APPEARANCE;
+            document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
+        }
+    });
+}
+
 function loadAppearance(cb) {
     if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
         cb && cb();
