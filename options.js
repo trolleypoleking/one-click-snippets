@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const colorInput = document.getElementById('color');
-  const borderInput = document.getElementById('border');
+  const colorInput = document.getElementById('borderColor');
+  const borderInput = document.getElementById('borderStyle');
+  const bgTintInput = document.getElementById('bgTint');
+  const animDurInput = document.getElementById('animDur');
   const status = document.getElementById('status');
   const snippetsDiv = document.getElementById('snippets');
   const hotkeyInputs = {};
@@ -16,10 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return parts.join('+');
   }
 
-  chrome.storage.sync.get({ appearance: { color: '#4A90E2', border: '2px dashed' } }, data => {
+  chrome.storage.sync.get({ appearance: { borderColor: '#4A90E2', borderStyle: '2px dashed', bgTint: 0.08, animDuration: 0.4 } }, data => {
     const ap = data.appearance;
-    colorInput.value = ap.color;
-    borderInput.value = ap.border;
+    colorInput.value = ap.borderColor;
+    borderInput.value = ap.borderStyle;
+    bgTintInput.value = ap.bgTint;
+    animDurInput.value = ap.animDuration;
 
     Object.keys(data).forEach(k => {
       if (k === 'appearance') return;
@@ -46,8 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('save').addEventListener('click', () => {
     const ap = {
-      color: colorInput.value,
-      border: borderInput.value
+      borderColor: colorInput.value,
+      borderStyle: borderInput.value,
+      bgTint: parseFloat(bgTintInput.value),
+      animDuration: parseFloat(animDurInput.value)
     };
     chrome.storage.sync.set({ appearance: ap }, () => {
       status.textContent = 'Saved';
