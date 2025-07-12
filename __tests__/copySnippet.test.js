@@ -1,4 +1,4 @@
-const { copySnippetText } = require('../content_script');
+const { copySnippetText } = require('../modules/dom');
 
 describe('copySnippetText', () => {
   beforeEach(() => {

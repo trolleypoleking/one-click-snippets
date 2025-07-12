@@ -1,4 +1,4 @@
-const { wrapRangeWithSnippet } = require('../content_script');
+const { wrapRangeWithSnippet } = require('../modules/selection');
 
 describe('wrapRangeWithSnippet', () => {
   beforeEach(() => {
