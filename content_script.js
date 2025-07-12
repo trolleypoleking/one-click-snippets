@@ -108,6 +108,9 @@ function wrapRangeWithSnippet(range, meta) {
 
 // Save a snippet’s metadata to chrome.storage.sync
 function saveSnippetMeta(meta) {
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
+        return;
+    }
     chrome.storage.sync.get([DOC_KEY], data => {
         const arr = data[DOC_KEY] || [];
         arr.push(meta);
@@ -117,6 +120,9 @@ function saveSnippetMeta(meta) {
 
 // Load & rehydrate all snippets for this doc
 function loadSavedSnippets() {
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
+        return;
+    }
     chrome.storage.sync.get([DOC_KEY], data => {
         const arr = data[DOC_KEY] || [];
         arr.forEach(meta => {
@@ -213,11 +219,15 @@ if (typeof document !== 'undefined') {
     // 3) On-load rehydrate snippets
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            loadSavedSnippets();
+            if (typeof chrome !== 'undefined') {
+                loadSavedSnippets();
+            }
             document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
         });
     } else {
-        loadSavedSnippets();
+        if (typeof chrome !== 'undefined') {
+            loadSavedSnippets();
+        }
         document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
     }
 }
