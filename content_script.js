@@ -99,6 +99,24 @@ function deserializeRange(info) {
 }
 
 // Inject a copy pill for a snippet span
+function updatePillPosition(span, pill) {
+    const rect = span.getBoundingClientRect();
+    const fullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight &&
+                         rect.left >= 0 && rect.right <= window.innerWidth;
+
+    if (fullyVisible) {
+        pill.classList.remove('fixed');
+        if (pill.parentNode !== span) {
+            span.appendChild(pill);
+        }
+    } else {
+        pill.classList.add('fixed');
+        if (pill.parentNode !== document.body) {
+            document.body.appendChild(pill);
+        }
+    }
+}
+
 function injectCopyPill(span) {
     if (!span || span.querySelector('.copy-pill')) return;
 
@@ -106,18 +124,11 @@ function injectCopyPill(span) {
     pill.className = 'copy-pill';
     pill.textContent = '⎘';
 
-    const rect = span.getBoundingClientRect();
-    const fullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight &&
-                         rect.left >= 0 && rect.right <= window.innerWidth;
+    const handler = () => updatePillPosition(span, pill);
+    window.addEventListener('scroll', handler);
+    window.addEventListener('resize', handler);
 
-    if (fullyVisible) {
-        span.appendChild(pill);
-    } else {
-        pill.style.position = 'fixed';
-        pill.style.top = '10px';
-        pill.style.right = '10px';
-        document.body.appendChild(pill);
-    }
+    updatePillPosition(span, pill);
 }
 
 // Copy snippet text to clipboard and trigger flash animation
