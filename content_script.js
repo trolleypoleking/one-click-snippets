@@ -81,6 +81,57 @@ function injectCopyPill(span) {
     }
 }
 
+// Update a snippet's alias in chrome.storage.sync
+function updateSnippetAlias(snippetId, alias) {
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
+        return;
+    }
+    chrome.storage.sync.get([DOC_KEY], data => {
+        const arr = data[DOC_KEY] || [];
+        const idx = arr.findIndex(m => m.snippetId === snippetId);
+        if (idx !== -1) {
+            arr[idx].alias = alias;
+            chrome.storage.sync.set({ [DOC_KEY]: arr });
+        }
+    });
+}
+
+// Enable inline renaming of a snippet badge
+function enableBadgeEditing(span) {
+    const badge = span.querySelector('.snippet-badge');
+    if (!badge) return;
+    badge.addEventListener('dblclick', () => {
+        const current = badge.textContent;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = current;
+        input.style.minWidth = '40px';
+        badge.replaceWith(input);
+        input.focus();
+        input.select();
+
+        const finish = (save) => {
+            if (save) {
+                const alias = input.value.trim() || current;
+                badge.textContent = alias;
+                span.dataset.alias = alias;
+                updateSnippetAlias(span.dataset.snippetId, alias);
+            }
+            input.replaceWith(badge);
+        };
+
+        input.addEventListener('blur', () => finish(true));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                finish(true);
+            } else if (e.key === 'Escape') {
+                finish(false);
+            }
+        });
+    });
+}
+
 // Wrap a Range in a span + inject its badge
 function wrapRangeWithSnippet(range, meta) {
     if (!range) return;
@@ -104,6 +155,7 @@ function wrapRangeWithSnippet(range, meta) {
     span.insertBefore(badge, span.firstChild);
 
     injectCopyPill(span);
+    enableBadgeEditing(span);
 }
 
 // Save a snippet’s metadata to chrome.storage.sync
@@ -129,7 +181,10 @@ function loadSavedSnippets() {
             const range = deserializeRange(meta.rangeInfo);
             wrapRangeWithSnippet(range, meta);
         });
-        document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
+        document.querySelectorAll('.oneclick-snippet').forEach(span => {
+            injectCopyPill(span);
+            enableBadgeEditing(span);
+        });
     });
 }
 
