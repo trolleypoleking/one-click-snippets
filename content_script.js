@@ -81,6 +81,33 @@ function injectCopyPill(span) {
     }
 }
 
+// Copy snippet text to clipboard and trigger flash animation
+function copySnippetText(span) {
+    if (!span) return;
+    const text = span.innerText || span.textContent || '';
+    const doCopy = navigator.clipboard && navigator.clipboard.writeText ?
+        navigator.clipboard.writeText(text) :
+        new Promise(resolve => {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) { /* noop */ }
+            document.body.removeChild(ta);
+            resolve();
+        });
+
+    doCopy.then(() => {
+        span.classList.add('copy-anim');
+        span.addEventListener('animationend', () => {
+            span.classList.remove('copy-anim');
+        }, { once: true });
+    });
+}
+
 // Update a snippet's alias in chrome.storage.sync
 function updateSnippetAlias(snippetId, alias) {
     if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
@@ -268,6 +295,9 @@ if (typeof document !== 'undefined') {
     document.addEventListener('click', (e) => {
         if (e.target.id === SNIPPET_BTN_ID) {
             handleSnippetButtonClick();
+        } else if (e.target.classList.contains('copy-pill')) {
+            const span = e.target.closest('.oneclick-snippet');
+            copySnippetText(span);
         }
     });
 
@@ -289,5 +319,5 @@ if (typeof document !== 'undefined') {
 
 // Export functions for testing in Node environments
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { serializeRange, deserializeRange, wrapRangeWithSnippet };
+    module.exports = { serializeRange, deserializeRange, wrapRangeWithSnippet, copySnippetText };
 }
