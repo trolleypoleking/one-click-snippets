@@ -204,9 +204,31 @@ function copySnippetText(span) {
     doCopy.then(() => {
         span.classList.add('copy-anim');
         span.addEventListener('animationend', () => {
-            span.classList.remove('copy-anim');
-        }, { once: true });
+        span.classList.remove('copy-anim');
+    }, { once: true });
+});
+}
+
+// Show a temporary on-screen message
+function showMessage(msg, timeout = 4000) {
+    if (typeof document === 'undefined') return;
+    const div = document.createElement('div');
+    div.className = 'ocs-message';
+    div.textContent = msg;
+    Object.assign(div.style, {
+        position: 'fixed',
+        bottom: '10px',
+        right: '10px',
+        background: '#333',
+        color: '#fff',
+        padding: '8px 12px',
+        borderRadius: '4px',
+        fontSize: '12px',
+        zIndex: '10000',
+        opacity: '0.9'
     });
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), timeout);
 }
 
 function hotkeyFromEvent(e) {
@@ -328,8 +350,14 @@ function loadSavedSnippets() {
     }
     chrome.storage.sync.get([DOC_KEY], data => {
         const arr = data[DOC_KEY] || [];
+        let failed = 0;
         arr.forEach(meta => {
             const range = deserializeRange(meta.rangeInfo);
+            if (!range) {
+                console.warn('One-Click Snippets: could not restore snippet', meta);
+                failed++;
+                return;
+            }
             wrapRangeWithSnippet(range, meta);
         });
         document.querySelectorAll('.oneclick-snippet').forEach(span => {
@@ -337,6 +365,9 @@ function loadSavedSnippets() {
             enableBadgeEditing(span);
         });
         updateHotkeyMap();
+        if (failed > 0) {
+            showMessage(`${failed} snippet${failed === 1 ? '' : 's'} could not be restored. They may have been edited or removed.`);
+        }
     });
 }
 
