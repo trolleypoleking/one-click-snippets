@@ -1,4 +1,4 @@
-const { serializeRange, deserializeRange } = require('../content_script');
+const { serializeRange, deserializeRange } = require('../modules/selection');
 
 describe('range serialization', () => {
   beforeEach(() => {

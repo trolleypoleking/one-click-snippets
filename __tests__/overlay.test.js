@@ -1,10 +1,12 @@
 // Tests for overlay open/close and fuzzy search
-const cs = require('../content_script');
+// load modules so globals exist before content_script
+require('../modules/selection');
+const { copySnippetText } = require('../modules/dom');
+const storage = require('../modules/storage');
 const {
-  copySnippetText,
   updateHotkeyMap,
   closeLeaderOverlay,
-} = cs;
+} = require('../content_script');
 
 describe('leader overlay and hotkeys', () => {
   beforeEach(() => {
