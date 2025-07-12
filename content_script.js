@@ -6,6 +6,45 @@ console.log('One-Click Snippets content script loaded.');
 // CONFIG
 const SNIPPET_BTN_ID = 'ocs-snippet-button';
 const DOC_KEY = (typeof location !== 'undefined' ? location.pathname : ''); // e.g. "/document/d/…"
+const DEFAULT_APPEARANCE = { color: '#4A90E2', border: '2px dashed' };
+let appearance = { ...DEFAULT_APPEARANCE };
+loadAppearance(() => {
+    document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
+});
+
+function loadAppearance(cb) {
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
+        cb && cb();
+        return;
+    }
+    chrome.storage.sync.get({ appearance: DEFAULT_APPEARANCE }, data => {
+        appearance = data.appearance || DEFAULT_APPEARANCE;
+        cb && cb();
+    });
+}
+
+function hexToRgba(hex, alpha) {
+    hex = hex.replace('#','');
+    if (hex.length === 3) {
+        const r = parseInt(hex[0] + hex[0], 16);
+        const g = parseInt(hex[1] + hex[1], 16);
+        const b = parseInt(hex[2] + hex[2], 16);
+        return `rgba(${r},${g},${b},${alpha})`;
+    } else if (hex.length === 6) {
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+    return `rgba(0,0,0,${alpha})`;
+}
+
+function applyAppearanceToSpan(span) {
+    if (!span) return;
+    span.style.border = `${appearance.border} ${appearance.color}`;
+    span.style.background = hexToRgba(appearance.color, 0.08);
+}
 
 // —— HELPERS ——
 
@@ -167,6 +206,7 @@ function wrapRangeWithSnippet(range, meta) {
     span.dataset.snippetId = meta.snippetId;
     span.dataset.alias     = meta.alias;
     span.style.position    = 'relative';
+    applyAppearanceToSpan(span);
 
     try {
         range.surroundContents(span);
