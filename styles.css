@@ -2,5 +2,6 @@
 .oneclick-snippet { border:2px dashed #4A90E2; background:rgba(74,144,226,0.08); padding:2px 4px; }
 .snippet-badge { position:absolute; top:-10px; left:0; background:#4A90E2; color:#fff; border-radius:3px; padding:2px 6px; cursor:pointer; }
 .copy-pill { position:absolute; top:0; right:0; background:#fff; border:1px solid #ccc; border-radius:12px; padding:4px 8px; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+.copy-pill.fixed { position:fixed; top:10px; right:10px; }
 @keyframes copyFlash { 0%{background:rgba(74,144,226,0.2);}50%{background:rgba(74,144,226,0.5);}100%{background:transparent;} }
 .copy-anim { animation:copyFlash .4s ease-out; }
