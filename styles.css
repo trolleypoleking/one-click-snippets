@@ -5,3 +5,29 @@
 .copy-pill.fixed { position:fixed; top:10px; right:10px; }
 @keyframes copyFlash { 0%{background:rgba(74,144,226,0.2);}50%{background:rgba(74,144,226,0.5);}100%{background:transparent;} }
 .copy-anim { animation:copyFlash .4s ease-out; }
+
+/* Leader key overlay */
+.ocs-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.ocs-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.ocs-modal input {
+  width: 200px;
+  font-size: 16px;
+}

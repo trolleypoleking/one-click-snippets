@@ -377,6 +377,60 @@ if (typeof document !== 'undefined') {
     }
 }
 
+// —— LEADER KEY OVERLAY ——
+let overlayEl = null;
+
+function closeLeaderOverlay() {
+    if (overlayEl) {
+        overlayEl.remove();
+        overlayEl = null;
+    }
+}
+
+function openLeaderOverlay() {
+    if (overlayEl) return;
+    overlayEl = document.createElement('div');
+    overlayEl.className = 'ocs-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'ocs-modal';
+    const input = document.createElement('input');
+    input.type = 'text';
+    modal.appendChild(input);
+    overlayEl.appendChild(modal);
+
+    overlayEl.addEventListener('click', (e) => {
+        if (e.target === overlayEl) closeLeaderOverlay();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeLeaderOverlay();
+        }
+    });
+
+    document.body.appendChild(overlayEl);
+    input.focus();
+}
+
+function isEditableElement(el) {
+    if (!el) return false;
+    return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('keydown', (e) => {
+        const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+        const mod = isMac ? e.metaKey : e.ctrlKey;
+        if (mod && e.key.toLowerCase() === 'k' && !e.shiftKey && !e.altKey) {
+            if (isEditableElement(e.target)) return;
+            e.preventDefault();
+            openLeaderOverlay();
+        }
+    });
+}
+
 // Export functions for testing in Node environments
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { serializeRange, deserializeRange, wrapRangeWithSnippet, copySnippetText };
