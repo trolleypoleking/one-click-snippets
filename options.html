@@ -1,18 +1,30 @@
 <!doctype html>
 <html>
-  <body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="ocs-ui">
+  <header>
+    <img src="icons/icon48.png" class="logo" alt="Logo">
+    <h2>Options</h2>
+  </header>
+  <section>
     <h3>Appearance Settings</h3>
-    <label>Border Color: <input type="color" id="borderColor"></label><br>
-    <label>Border Style: <input type="text" id="borderStyle" placeholder="2px dashed"></label><br>
-    <label>Background Tint (0-1): <input type="number" id="bgTint" min="0" max="1" step="0.01"></label><br>
-    <label>Animation Duration (s): <input type="number" id="animDur" min="0" step="0.1"></label><br>
-    <button id="save">Save</button>
-    <span id="status"></span>
+    <div class="form-row"><label>Border Color: <input type="color" id="borderColor"></label></div>
+    <div class="form-row"><label>Border Style: <input type="text" id="borderStyle" placeholder="2px dashed"></label></div>
+    <div class="form-row"><label>Background Tint (0-1): <input type="number" id="bgTint" min="0" max="1" step="0.01"></label></div>
+    <div class="form-row"><label>Animation Duration (s): <input type="number" id="animDur" min="0" step="0.1"></label></div>
+    <button id="save">Save</button> <span id="status"></span>
+  </section>
 
+  <section>
     <h3>Snippet Hotkeys</h3>
     <div id="snippets"></div>
     <button id="save-hotkeys">Save Hotkeys</button>
+  </section>
 
-    <script src="options.js"></script>
-  </body>
+  <script src="options.js"></script>
+</body>
 </html>
