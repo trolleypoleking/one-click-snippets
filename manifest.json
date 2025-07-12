@@ -28,7 +28,8 @@
         "modules/storage.js",
         "content_script.js"
       ],
-      "css": [ "styles.css" ]
+      "css": [ "styles.css" ],
+      "all_frames": true
     }
   ]
 }
