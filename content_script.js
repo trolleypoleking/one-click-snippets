@@ -8,15 +8,31 @@ const SNIPPET_BTN_ID = 'ocs-snippet-button';
 const DOC_KEY = (typeof location !== 'undefined' ? location.pathname : ''); // e.g. "/document/d/…"
 const DEFAULT_APPEARANCE = { color: '#4A90E2', border: '2px dashed' };
 let appearance = { ...DEFAULT_APPEARANCE };
+let hotkeyMap = {};
 loadAppearance(() => {
     document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
 });
 
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'sync' && changes.appearance) {
-            appearance = changes.appearance.newValue || DEFAULT_APPEARANCE;
-            document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
+        if (area === 'sync') {
+            if (changes.appearance) {
+                appearance = changes.appearance.newValue || DEFAULT_APPEARANCE;
+                document.querySelectorAll('.oneclick-snippet').forEach(applyAppearanceToSpan);
+            }
+            if (changes[DOC_KEY]) {
+                const arr = changes[DOC_KEY].newValue || [];
+                arr.forEach(meta => {
+                    const span = document.querySelector(`.oneclick-snippet[data-snippet-id="${meta.snippetId}"]`);
+                    if (span) {
+                        span.dataset.alias = meta.alias;
+                        span.dataset.hotkey = meta.hotkey || '';
+                        const badge = span.querySelector('.snippet-badge');
+                        if (badge) badge.textContent = meta.alias;
+                    }
+                });
+                updateHotkeyMap();
+            }
         }
     });
 }
@@ -167,6 +183,27 @@ function copySnippetText(span) {
     });
 }
 
+function hotkeyFromEvent(e) {
+    const parts = [];
+    if (e.ctrlKey) parts.push('Ctrl');
+    if (e.metaKey) parts.push('Meta');
+    if (e.altKey) parts.push('Alt');
+    if (e.shiftKey) parts.push('Shift');
+    const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    parts.push(key);
+    return parts.join('+');
+}
+
+function updateHotkeyMap() {
+    hotkeyMap = {};
+    document.querySelectorAll('.oneclick-snippet').forEach(span => {
+        const hk = span.dataset.hotkey;
+        if (hk) {
+            hotkeyMap[hk] = span;
+        }
+    });
+}
+
 // Update a snippet's alias in chrome.storage.sync
 function updateSnippetAlias(snippetId, alias) {
     if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
@@ -225,6 +262,7 @@ function wrapRangeWithSnippet(range, meta) {
     span.className = 'oneclick-snippet';
     span.dataset.snippetId = meta.snippetId;
     span.dataset.alias     = meta.alias;
+    span.dataset.hotkey    = meta.hotkey || '';
     span.style.position    = 'relative';
     applyAppearanceToSpan(span);
 
@@ -272,6 +310,7 @@ function loadSavedSnippets() {
             injectCopyPill(span);
             enableBadgeEditing(span);
         });
+        updateHotkeyMap();
     });
 }
 
@@ -326,6 +365,7 @@ function handleSnippetButtonClick() {
     };
     wrapRangeWithSnippet(range, meta);
     saveSnippetMeta(meta);
+    updateHotkeyMap();
 
     removeSnippetButton();
     sel.removeAllRanges();
@@ -510,6 +550,14 @@ if (typeof document !== 'undefined') {
             if (isEditableElement(e.target)) return;
             e.preventDefault();
             openLeaderOverlay();
+        } else {
+            if (isEditableElement(e.target)) return;
+            const hk = hotkeyFromEvent(e);
+            const span = hotkeyMap[hk];
+            if (span) {
+                e.preventDefault();
+                copySnippetText(span);
+            }
         }
     });
 }
