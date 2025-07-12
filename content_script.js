@@ -5,7 +5,7 @@ console.log('One-Click Snippets content script loaded.');
 
 // CONFIG
 const SNIPPET_BTN_ID = 'ocs-snippet-button';
-const DOC_KEY = location.pathname;  // e.g. "/document/d/…"
+const DOC_KEY = (typeof location !== 'undefined' ? location.pathname : ''); // e.g. "/document/d/…"
 
 // —— HELPERS ——
 
@@ -186,37 +186,40 @@ function handleSnippetButtonClick() {
 // —— EVENT WIRES ——
 
 // 1) Selection detection → show button
-document.addEventListener('mouseup', () => {
-    if (!location.hostname.includes('docs.google.com')) return;
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
-        removeSnippetButton();
-        return;
-    }
-    const rect = sel.getRangeAt(0).getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) {
-        removeSnippetButton();
-        return;
-    }
-    showSnippetButton(rect);
-});
+if (typeof document !== 'undefined') {
+    document.addEventListener('mouseup', () => {
+        if (typeof location !== 'undefined' && location.hostname.includes('docs.google.com')) {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+                removeSnippetButton();
+                return;
+            }
+            const rect = sel.getRangeAt(0).getBoundingClientRect();
+            if (rect.width === 0 && rect.height === 0) {
+                removeSnippetButton();
+                return;
+            }
+            showSnippetButton(rect);
+        }
+    });
 
-// 2) Delegate button clicks
-document.addEventListener('click', (e) => {
-    if (e.target.id === SNIPPET_BTN_ID) {
-        handleSnippetButtonClick();
-    }
-});
+    // 2) Delegate button clicks
+    document.addEventListener('click', (e) => {
+        if (e.target.id === SNIPPET_BTN_ID) {
+            handleSnippetButtonClick();
+        }
+    });
 
-// 3) On-load rehydrate snippets
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+    // 3) On-load rehydrate snippets
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedSnippets();
+            document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
+        });
+    } else {
         loadSavedSnippets();
         document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
-    });
-} else {
-    loadSavedSnippets();
-    document.querySelectorAll('.oneclick-snippet').forEach(injectCopyPill);
+    }
 }
 
 // Export functions for testing in Node environments
