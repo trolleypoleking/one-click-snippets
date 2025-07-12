@@ -31,3 +31,21 @@
   width: 200px;
   font-size: 16px;
 }
+
+/* Search results */
+.ocs-results {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.ocs-results li {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.ocs-results li.highlight {
+  background: #eee;
+}
