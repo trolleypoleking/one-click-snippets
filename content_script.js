@@ -594,5 +594,16 @@ if (typeof document !== 'undefined') {
 
 // Export functions for testing in Node environments
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { serializeRange, deserializeRange, wrapRangeWithSnippet, copySnippetText };
+    module.exports = {
+        serializeRange,
+        deserializeRange,
+        wrapRangeWithSnippet,
+        copySnippetText,
+        updateHotkeyMap,
+        hotkeyFromEvent,
+        openLeaderOverlay,
+        closeLeaderOverlay,
+        searchSnippets,
+        fuzzyScore,
+    };
 }
