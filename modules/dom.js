@@ -129,7 +129,7 @@
         btn.id = SNIPPET_BTN_ID;
         btn.textContent = '+ Snippet';
         Object.assign(btn.style, {
-            position: 'absolute',
+            position: 'fixed',
             zIndex: '9999',
             padding: '4px 8px',
             background: 'var(--ocs-border-color)',
@@ -137,13 +137,19 @@
             border: 'none',
             borderRadius: '4px',
             fontSize: '12px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            top: '0px',
+            left: '0px'
         });
-        const top  = rect.top  + window.scrollY - 30;
-        const left = rect.left + window.scrollX;
+        document.body.appendChild(btn);
+        const rawTop  = rect.top - 30;
+        const rawLeft = rect.left;
+        const maxTop  = window.innerHeight - btn.offsetHeight;
+        const maxLeft = window.innerWidth  - btn.offsetWidth;
+        const top  = Math.min(Math.max(0, rawTop), maxTop);
+        const left = Math.min(Math.max(0, rawLeft), maxLeft);
         btn.style.top  = `${top}px`;
         btn.style.left = `${left}px`;
-        document.body.appendChild(btn);
     }
 
     global.SNIPPET_BTN_ID = SNIPPET_BTN_ID;
