@@ -53,4 +53,22 @@ describe('leader overlay and hotkeys', () => {
     document.dispatchEvent(evt);
     expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith('Foo');
   });
+
+  test('selectionchange shows snippet button', () => {
+    document.body.innerHTML = '<p id="p">Hello world</p>';
+    const p = document.getElementById('p');
+    const text = p.firstChild;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 5);
+    Range.prototype.getBoundingClientRect = () => ({ width: 10, height: 10, left: 0, top: 0 });
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    document.dispatchEvent(new Event('selectionchange'));
+
+    const btn = document.getElementById('ocs-snippet-button');
+    expect(btn).not.toBeNull();
+  });
 });

@@ -87,22 +87,26 @@ function updateHotkeyMap() {
 // —— EVENT WIRES ——
 
 // 1) Selection detection → show button
+function maybeShowSnippetButton() {
+    if (typeof location === 'undefined' || !location.hostname.includes('docs.google.com')) {
+        return;
+    }
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+        removeSnippetButton();
+        return;
+    }
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) {
+        removeSnippetButton();
+        return;
+    }
+    showSnippetButton(rect);
+}
+
 if (typeof document !== 'undefined') {
-    document.addEventListener('mouseup', () => {
-        if (typeof location !== 'undefined' && location.hostname.includes('docs.google.com')) {
-            const sel = window.getSelection();
-            if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
-                removeSnippetButton();
-                return;
-            }
-            const rect = sel.getRangeAt(0).getBoundingClientRect();
-            if (rect.width === 0 && rect.height === 0) {
-                removeSnippetButton();
-                return;
-            }
-            showSnippetButton(rect);
-        }
-    });
+    document.addEventListener('mouseup', maybeShowSnippetButton);
+    document.addEventListener('selectionchange', maybeShowSnippetButton);
 
     // 2) Delegate button clicks
     document.addEventListener('click', (e) => {
