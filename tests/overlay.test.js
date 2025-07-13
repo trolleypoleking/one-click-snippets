@@ -71,4 +71,31 @@ describe('leader overlay and hotkeys', () => {
     const btn = document.getElementById('ocs-snippet-button');
     expect(btn).not.toBeNull();
   });
+
+  test('selection inside nested iframe shows snippet button', () => {
+    document.body.innerHTML = '<iframe id="outer"></iframe>';
+    const outer = document.getElementById('outer');
+    outer.contentDocument.write('<iframe id="inner"></iframe>');
+    outer.contentDocument.close();
+    const inner = outer.contentDocument.getElementById('inner');
+    inner.contentDocument.write('<p id="t">Hello world</p>');
+    inner.contentDocument.close();
+
+    const p = inner.contentDocument.getElementById('t');
+    const text = p.firstChild;
+    const range = inner.contentDocument.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 5);
+    Range.prototype.getBoundingClientRect = () => ({ width: 10, height: 10, left: 0, top: 0 });
+    inner.contentWindow.Range.prototype.getBoundingClientRect = Range.prototype.getBoundingClientRect;
+    const sel = inner.contentWindow.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    inner.focus();
+
+    document.dispatchEvent(new Event('selectionchange'));
+
+    const btn = document.getElementById('ocs-snippet-button');
+    expect(btn).not.toBeNull();
+  });
 });
