@@ -91,7 +91,22 @@ function maybeShowSnippetButton() {
     if (typeof location === 'undefined' || !location.hostname.includes('docs.google.com')) {
         return;
     }
-    const sel = window.getSelection();
+    let sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+        let frame = document.activeElement;
+        while (frame && frame.tagName === 'IFRAME') {
+            try {
+                const frameSel = frame.contentWindow.getSelection();
+                if (frameSel && !frameSel.isCollapsed && frameSel.rangeCount > 0) {
+                    sel = frameSel;
+                    break;
+                }
+                frame = frame.contentDocument.activeElement;
+            } catch (e) {
+                break;
+            }
+        }
+    }
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
         removeSnippetButton();
         return;
