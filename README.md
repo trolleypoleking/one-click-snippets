@@ -21,6 +21,9 @@ One-Click Snippets is a Chrome extension that lets you mark passages in Google D
    - `https://docs.google.com/document/*`
    - `https://docs.googleusercontent.com/*`
 
+This extension runs entirely from its content and popup scripts, so there is no
+background service worker to configure or reload.
+
 ## Features
 
 - **Add snippets easily** – highlight text in Google Docs and press the `+ Snippet` button that appears.
@@ -31,6 +34,7 @@ One-Click Snippets is a Chrome extension that lets you mark passages in Google D
 - **Assign hotkeys** – manage hotkeys for each snippet from the options page.
 - **Popup list** – the extension popup shows snippets for the current document.
 - **Editable labels** – double click a snippet’s badge to rename it in place.
+- **No background script** – the extension has no background service worker.
 
 ![overlay screenshot](docs/screenshots/overlay.png)
 

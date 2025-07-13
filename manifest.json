@@ -13,9 +13,6 @@
     "https://docs.google.com/document/*",
     "https://docs.googleusercontent.com/*"
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
   "action": {
     "default_popup": "popup.html" 
   },
