@@ -17,9 +17,10 @@ One-Click Snippets is a Chrome extension that lets you mark passages in Google D
 3. Load the extension in Chrome:
    - Open `chrome://extensions` and enable **Developer mode**.
    - Click **Load unpacked** and select this project directory.
-4. Ensure host permissions include both Google Docs URLs:
-   - `https://docs.google.com/document/*`
-   - `https://docs.googleusercontent.com/*`
+4. Enable host permissions for Google Docs:
+   - On `chrome://extensions`, click **Manage extension** for One-Click Snippets.
+   - Under **Site access**, choose **Automatically allow** for `docs.google.com` and `docs.googleusercontent.com`.
+5. If the `+ Snippet` button doesn't appear, open **Manage extension** and check that site access is set to **Automatically allow**, then reload your document.
 
 This extension runs entirely from its content and popup scripts, so there is no
 background service worker to configure or reload.
