@@ -9,8 +9,9 @@
     "scripting",
     "clipboardWrite"
   ],
-  "host_permissions": [
-    "https://docs.google.com/document/*"
+    "host_permissions": [
+    "https://docs.google.com/document/*",
+    "https://docs.googleusercontent.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -21,7 +22,10 @@
   "options_page": "options.html",
   "content_scripts": [
     {
-      "matches": [ "https://docs.google.com/document/*" ],
+      "matches": [
+        "https://docs.google.com/document/*",
+        "https://docs.googleusercontent.com/*"
+      ],
       "js": [
         "modules/selection.js",
         "modules/dom.js",
