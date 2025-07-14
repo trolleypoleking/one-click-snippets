@@ -88,7 +88,7 @@ function updateHotkeyMap() {
 
 // 1) Selection detection → show button
 function maybeShowSnippetButton() {
-    if (typeof location === 'undefined' || !location.hostname.includes('docs.google.com')) {
+    if (typeof location === 'undefined') {
         return;
     }
     let sel = window.getSelection();
